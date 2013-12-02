@@ -1,0 +1,28 @@
+[WebSiteInfo]
+
+;; This is the api's url wich contain all cycle informations.
+;; Required. No default value.
+UrlPath='https://api.jcdecaux.com/vls/v1/stations/'
+
+;; ApiKey is the key to access to UrlPath. 
+;; You can request one on the https://developer.jcdecaux.com website.
+;; Required if you want daemon works fine. No default value.
+ApiKey=YourApiKey
+
+
+[SrvInfo]
+
+;; Set the local time to use. If blanck, default is fr_FR.UTF8.
+LCTIME=''
+
+;; Set the redis server and port to used.
+;; Required if you want daemon works fine. 
+;; If blank, default values are 'localhost' and '6379'.
+RedisHost='localhost'
+RedisPort=''
+
+;; This value is the number (in second) which define the frequency.
+;; that the daemon refresh inforation from the api into the redis server.
+;; default '2'.
+Refresh=''
+

@@ -1,0 +1,200 @@
+#!/bin/bash
+
+# /etc/init.d/GetCountryInfo -- startup script
+# Written by Gauthier FRANCOIS -- gauthier@openux.org
+#
+# Desc : This script is used to get JCDecaux informations of bike station with a php script. 
+#        It will be used with a configuration file, which describe which Country
+#        should be get and set in redis key/value program
+
+# Required : / php5-cli / php5-redis / php-services-json / redis-server
+
+
+# Define environment
+# Variables can be overwritten by the /etc/default/jcdaemon.conf configuration file
+PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin
+Name="jcdaemon"
+Desc="JCDecaux daemon bike station"
+Default="/etc/default/$Name.conf"
+Country=$2
+
+if [ `id -u` -ne 0 ]; then
+        echo "You need root privileges to run this script"
+        exit 1
+fi
+
+. /lib/lsb/init-functions
+
+bs_User=$Name
+bs_Group=$Name
+
+ScriptName="$Name.php"
+PhpPath=`which php`
+ScriptPath=`which $ScriptName`
+
+LogDir="/var/log/$Name"
+
+# End of variables that can be overwritten by the /etc/default/jcdaemon configuration file
+
+# overwrite settings from default configuration file
+if [ -f "$Default" ]
+then
+        . "$Default"
+fi
+
+
+# Test if User, php-cli and jcdaemon php script are available
+fnTestEnv()
+{
+
+if  ! id -u $bs_User>/dev/null 2>&1 
+then
+        log_warning_msg "User $bs_User does not exist. Please create this user."
+	exit 1;
+fi
+
+if [ -z $ScriptPath ]
+then
+	log_warning_msg "Sorry $ScriptName is not present on this server"
+	exit 1;
+fi
+
+if [ -z $PhpPath ]
+then
+	log_warning_msg "No Php cli found on this server"
+	exit 1;
+fi
+
+}
+
+# Check in one instance has been already started
+fnAlreadyRun()
+{
+
+CheckPid=`pgrep -f "$ScriptName $CountryDaemon"`
+
+if [ -f $PID_File ]
+then
+	log_warning_msg "$Name-$CountryDaemon is already running. Pid file exist"
+	continue 1
+elif [ ! -z $CheckPid ]
+then
+	log_warning_msg "$Name-$CountryDaemon is already running. Process is in progress"
+	continue 1
+fi
+
+}
+
+# Check in one instance has been already stopped
+fnAlreadyStopped()
+{
+
+CheckPid=`pgrep -f "$ScriptName $CountryDaemon"`
+PID_File="/var/run/$Name-$CountryDaemon.pid"
+
+if [ ! -f $PID_File ]
+then
+        log_warning_msg "$Name-$CountryDaemon is not running. Pid file not exist"
+	continue 1
+elif [ -z $CheckPid ]
+then
+        log_warning_msg "$Name-$CountryDaemon is not running. Process is not in progress"
+	continue 1
+fi
+
+}
+
+# Check country argument
+fnCheckArg()
+{
+
+if [ -z $Country ]
+then
+	log_warning_msg "You should specify a country"
+	$0 --help
+	exit 0;
+
+elif [ $Country == "All" ]
+then
+	if [ -z "$CountryAll" ]
+	then
+		log_warning_msg "Please check the 'Country' variable in $Default configuration file"
+		exit 0;
+	else
+		Country="$CountryAll"
+	fi
+fi
+
+}
+
+fnPrepareEnv()
+{
+	mkdir -p "$LogDir" && chown "$bs_User":"$bs_Group" "$LogDir" 
+}
+
+fnUsage()
+{
+	echo "$0 start|stop|status|restart country"
+	echo "All country available are on https://developer.jcdecaux.com. If you encounter some problems look the syslog file."
+	exit 0;
+}
+
+fnConfFile()
+{
+
+if [ -f $Default ]
+then
+	. $Default
+fi
+
+}
+
+case "$1" in
+  start)
+	fnPrepareEnv
+	fnTestEnv
+	fnConfFile
+	fnCheckArg
+	fnTestEnv
+	for CountryDaemon in $Country
+	do
+	        PID_File="/var/run/$Name-$CountryDaemon.pid"
+		fnAlreadyRun
+		log_daemon_msg "Starting $Name-$CountryDaemon Daemon" 
+		start-stop-daemon --start --b --user $bs_User -c $Name --pidfile $PID_File -m -n "$Name-$CountryDaemon" --exec $PhpPath $ScriptPath $CountryDaemon 
+	log_end_msg $?
+	done
+	;;
+  status)
+	fnConfFile
+	fnCheckArg
+	for CountryDaemon in $Country
+        do
+                PID_File="/var/run/$Name-$CountryDaemon.pid"
+		status_of_proc -p $PID_File $Name $Name-$CountryDaemon
+        done && exit 0 || exit $?
+	;;
+  stop)
+	fnConfFile
+	fnCheckArg
+        for CountryDaemon in $Country
+        do
+		fnAlreadyStopped 
+        	log_daemon_msg "Stopping $Name-$CountryDaemon Daemon"
+                PID_File="/var/run/$Name-$CountryDaemon.pid"
+		start-stop-daemon --stop -p $PID_File $Name
+		if [ -f $PID_File ] 
+		then
+			rm $PID_File
+		fi
+		log_end_msg $?
+	done
+	;;
+  restart)
+	$0 stop $2 && $0 start $2
+	;;
+  *)
+	fnUsage
+	;;
+esac	
+
