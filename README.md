@@ -62,4 +62,4 @@ Compile your phpredis extension :
 
 CONFIGURATION
 -------------
-How
+
