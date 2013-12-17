@@ -1,10 +1,10 @@
 <?php
 
 //Open an openlog instance
-openlog("bsi2r", LOG_PID | LOG_PERROR , LOG_DAEMON);
+openlog("jcdaemon", LOG_PID | LOG_PERROR , LOG_DAEMON);
 
 // Read and initialize variables from the configuration file
-$ini_config = parse_ini_file("/etc/bsi2r/bsi2r.ini", true);
+$ini_config = parse_ini_file("/etc/jcdaemon/jcdaemon.ini", true);
 $WebSrvInfo=$ini_config['WebSiteInfo'];
 $SrvInfo=$ini_config['SrvInfo'];
 
@@ -83,15 +83,16 @@ $i=0;
 while (true) {
 
 // Url of country construction
-#$UrlCountry=$WebSrvInfo['UrlPath']."?contract=".$Country."&apiKey=".$WebSrvInfo['ApiKey'];
+$UrlCountry=$WebSrvInfo['UrlPath']."?contract=".$Country."&apiKey=".$WebSrvInfo['ApiKey'];
 // Dev url
-$UrlCountry="/var/www/".$Country;
+#$UrlCountry="/var/www/".$Country;
 
 #$UrlCountry="/home/croquette/paris-test.json";
 
 //Read and decode the Json file. Check the url with 1s of timeout.
 $TimeOut = stream_context_create(array('http' => array('timeout'=>0.1))); 
 $GetCountryContent=file_get_contents($UrlCountry, 0, $TimeOut);
+
 
 if ($GetCountryContent==false)
 {

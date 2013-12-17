@@ -25,8 +25,8 @@ fi
 
 . /lib/lsb/init-functions
 
-bs_User=$Name
-bs_Group=$Name
+JCUser=$Name
+JCGroup=$Name
 
 ScriptName="$Name.php"
 PhpPath=`which php`
@@ -47,9 +47,9 @@ fi
 fnTestEnv()
 {
 
-if  ! id -u $bs_User>/dev/null 2>&1 
+if  ! id -u $JCUser>/dev/null 2>&1 
 then
-        log_warning_msg "User $bs_User does not exist. Please create this user."
+        log_warning_msg "User $JCUser does not exist. Please create this user."
 	exit 1;
 fi
 
@@ -73,7 +73,7 @@ fnAlreadyRun()
 
 CheckPid=`pgrep -f "$ScriptName $CountryDaemon"`
 
-if [ -f $PID_File ]
+if [ -f $PidFile ]
 then
 	log_warning_msg "$Name-$CountryDaemon is already running. Pid file exist"
 	continue 1
@@ -90,9 +90,9 @@ fnAlreadyStopped()
 {
 
 CheckPid=`pgrep -f "$ScriptName $CountryDaemon"`
-PID_File="/var/run/$Name-$CountryDaemon.pid"
+PidFile="/var/run/$Name-$CountryDaemon.pid"
 
-if [ ! -f $PID_File ]
+if [ ! -f $PidFile ]
 then
         log_warning_msg "$Name-$CountryDaemon is not running. Pid file not exist"
 	continue 1
@@ -129,7 +129,7 @@ fi
 
 fnPrepareEnv()
 {
-	mkdir -p "$LogDir" && chown "$bs_User":"$bs_Group" "$LogDir" 
+	mkdir -p "$LogDir" && chown "$JCUser":"$JCGroup" "$LogDir" 
 }
 
 fnUsage()
@@ -139,53 +139,40 @@ fnUsage()
 	exit 0;
 }
 
-fnConfFile()
-{
-
-if [ -f $Default ]
-then
-	. $Default
-fi
-
-}
-
 case "$1" in
   start)
 	fnPrepareEnv
 	fnTestEnv
-	fnConfFile
 	fnCheckArg
 	fnTestEnv
 	for CountryDaemon in $Country
 	do
-	        PID_File="/var/run/$Name-$CountryDaemon.pid"
+	        PidFile="/var/run/$Name-$CountryDaemon.pid"
 		fnAlreadyRun
 		log_daemon_msg "Starting $Name-$CountryDaemon Daemon" 
-		start-stop-daemon --start --b --user $bs_User -c $Name --pidfile $PID_File -m -n "$Name-$CountryDaemon" --exec $PhpPath $ScriptPath $CountryDaemon 
+		start-stop-daemon --start --b --user $JCUser -c $Name --pidfile $PidFile -m -n "$Name-$CountryDaemon" --exec $PhpPath $ScriptPath $CountryDaemon 
 	log_end_msg $?
 	done
 	;;
   status)
-	fnConfFile
 	fnCheckArg
 	for CountryDaemon in $Country
         do
-                PID_File="/var/run/$Name-$CountryDaemon.pid"
-		status_of_proc -p $PID_File $Name $Name-$CountryDaemon
+                PidFile="/var/run/$Name-$CountryDaemon.pid"
+		status_of_proc -p $PidFile $Name $Name-$CountryDaemon
         done && exit 0 || exit $?
 	;;
   stop)
-	fnConfFile
 	fnCheckArg
         for CountryDaemon in $Country
         do
 		fnAlreadyStopped 
         	log_daemon_msg "Stopping $Name-$CountryDaemon Daemon"
-                PID_File="/var/run/$Name-$CountryDaemon.pid"
-		start-stop-daemon --stop -p $PID_File $Name
-		if [ -f $PID_File ] 
+                PidFile="/var/run/$Name-$CountryDaemon.pid"
+		start-stop-daemon --stop -p $PidFile $Name
+		if [ -f $PidFile ] 
 		then
-			rm $PID_File
+			rm $PidFile
 		fi
 		log_end_msg $?
 	done
