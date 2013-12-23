@@ -5,7 +5,7 @@ CONTENTS OF THIS FILE
  * Phpredis 
  * Configuration
 
-ABOUT BSI2R
+ABOUT JCDAEMON
 -----------
 
 Jcdaemon is an open source software
