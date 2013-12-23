@@ -9,6 +9,15 @@
 
 # Required : / php5-cli / php5-redis / php-services-json / redis-server
 
+### BEGIN INIT INFO
+# Provides:          jcdaemon
+# Required-Start:    $network $remote_fs $named
+# Required-Stop:     $network $remote_fs $named
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Starts jcdaemon
+# Description:       Starts jcdaemon using start-stop-daemon
+### END INIT INFO
 
 # Define environment
 # Variables can be overwritten by the /etc/default/jcdaemon.conf configuration file
@@ -30,9 +39,10 @@ JCGroup=$Name
 
 ScriptName="$Name.php"
 PhpPath=`which php`
-ScriptPath=`which $ScriptName`
+ScriptPath="/usr/lib/jcdaemon/$ScriptName"
 
 LogDir="/var/log/$Name"
+
 
 # End of variables that can be overwritten by the /etc/default/jcdaemon configuration file
 
@@ -75,11 +85,11 @@ CheckPid=`pgrep -f "$ScriptName $CountryDaemon"`
 
 if [ -f $PidFile ]
 then
-	log_warning_msg "$Name-$CountryDaemon is already running. Pid file exist"
+	log_warning_msg "$Name-$CountryDaemon is already running. Pid file exist."
 	continue 1
 elif [ ! -z $CheckPid ]
 then
-	log_warning_msg "$Name-$CountryDaemon is already running. Process is in progress"
+	log_warning_msg "$Name-$CountryDaemon is already running. Process is in progress."
 	continue 1
 fi
 
@@ -94,11 +104,11 @@ PidFile="/var/run/$Name-$CountryDaemon.pid"
 
 if [ ! -f $PidFile ]
 then
-        log_warning_msg "$Name-$CountryDaemon is not running. Pid file not exist"
+        log_warning_msg "$Name-$CountryDaemon is not running. Pid file not exist."
 	continue 1
 elif [ -z $CheckPid ]
 then
-        log_warning_msg "$Name-$CountryDaemon is not running. Process is not in progress"
+        log_warning_msg "$Name-$CountryDaemon is not running. Process is not in progress."
 	continue 1
 fi
 
@@ -110,15 +120,9 @@ fnCheckArg()
 
 if [ -z $Country ]
 then
-	log_warning_msg "You should specify a country"
-	$0 --help
-	exit 0;
-
-elif [ $Country == "All" ]
-then
 	if [ -z "$CountryAll" ]
 	then
-		log_warning_msg "Please check the 'Country' variable in $Default configuration file"
+		log_warning_msg "Please check the 'Country' variable in $Default configuration file."
 		exit 0;
 	else
 		Country="$CountryAll"

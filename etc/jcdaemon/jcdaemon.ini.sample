@@ -18,11 +18,11 @@ LCTIME=''
 ;; Set the redis server and port to used.
 ;; Required if you want daemon works fine. 
 ;; If blank, default values are 'localhost' and '6379'.
-RedisHost='localhost'
+RedisHost=''
 RedisPort=''
 
 ;; This value is the number (in second) which define the frequency.
 ;; that the daemon refresh inforation from the api into the redis server.
-;; default '2'.
+;; default '20'.
 Refresh=''
 

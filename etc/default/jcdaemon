@@ -1,13 +1,19 @@
 ### Not required but recommended if you want to use the 'all' argument with the init script.
+# Default: none
 #CountryAll='country1 country2'
 
 ### LogDir variable is the path of the logfiles.
-#LogDir='/var/log/jcdaemon/'
+# Default: /var/log/jcdaemon/
+#LogDir='
 
 ### PhpPath variable is the path where we can find the php binary.
-#PhpPath=`which php`
+# Default: which php
+#PhpPath=
 
 ### If you want to change the name and/or the path of php script.
-#Name="jcdaemon"
-#ScriptName="$Name.php"
-#ScriptPath=`which $ScriptName`
+
+# Default: jcdaemon.php
+#ScriptName=
+# Default: /usr/lib/jcdaemon/jcdaemon.php
+#ScriptPath=
+
