@@ -48,7 +48,7 @@ Installation requirement :
 
 Now, you should clone the git project from repository
 with this command line :
-* git clone git@github.com:nicolasff/phpredis.git
+* git clone https://github.com/nicolasff/phpredis.git
 
 Compile your phpredis extension :
 * cd phpredis/
