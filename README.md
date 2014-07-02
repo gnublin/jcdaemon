@@ -55,7 +55,7 @@ Compile your phpredis extension :
 * phpize
 * ./configure
 * make
-* cp modules/redis.so `php-config --extension-dir`
+* cp modules/redis.so \`php-config --extension-dir\`
 * cp rpm/redis.ini /etc/php5/conf.d/ # 
 * restart your webserver 
 
